@@ -35,6 +35,10 @@ public class Auth0User {
         return Optional.ofNullable(userInfo.getValues().get(key)).map(v -> castTo.cast(v));
     }
 
+    public String getSubject() {
+        return getValue("sub");
+    }
+
     public String getName() {
         return getValue("name");
     }

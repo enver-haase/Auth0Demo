@@ -51,7 +51,7 @@ public class MainView extends VerticalLayout implements View {
         addComponents(buttons, hello);
 
         Auth0Session.getCurrent().getUser().ifPresent(u -> {
-            hello.setValue("Hey " + u.getGivenName().orElse(u.getName()) + "!");
+            hello.setValue("Hey " + u.getGivenName().orElse(u.getSubject()) + "!");
 
             HorizontalLayout info = new HorizontalLayout();
             info.setSpacing(true);
