@@ -1,9 +1,8 @@
-# Vaadin 8 + Spring Boot + Auth0
+# Vaadin 14 + Spring Boot + Auth0
 
-This is just simple test project I made to test how to use these 3 together. API is little
-complex as Auth0 does not provide nice clean API for single page server side applications.
+Quick migrated basic functionality from @alump's Vaadin 8 + Spring Boot + Auth0 : 
 
-If you want to play around with this project, you need to:
+If you want to play around with this project, you need to: https://github.com/alump/Auth0Demo
 
 1. Register yourself as developer to Auth0
 2. Create new Client under your account
