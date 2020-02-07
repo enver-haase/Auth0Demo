@@ -3,60 +3,55 @@ package org.vaadin.alump.auth0demo;
 import com.auth0.AuthenticationController;
 import com.auth0.IdentityVerificationException;
 import com.auth0.Tokens;
-import com.auth0.client.auth.AuthAPI;
-import com.auth0.exception.Auth0Exception;
 import com.auth0.json.auth.UserInfo;
-import com.vaadin.annotations.Theme;
-import com.vaadin.server.Page;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServletRequest;
-import com.vaadin.spring.annotation.SpringUI;
-import com.vaadin.ui.*;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 /**
  * Created by alump on 05/07/2017.
  */
-@SpringUI(path = "/login")
-@Theme("valo")
-public class LoginUI extends UI {
+@Route("login")
+public class LoginView extends VerticalLayout implements AfterNavigationObserver {
 
     private ProgressBar spinner;
-    private Label errorLabel;
-    private Label errorDescLabel;
+    private H1 errorLabel;
+    private H2 errorDescLabel;
 
     private AuthenticationController authenticationController;
 
-    public LoginUI() {
+    public LoginView() {
         VerticalLayout layout = new VerticalLayout();
-        layout.addStyleName("wait-for-login");
+        //layout.addClassName("wait-for-login");
         layout.setMargin(true);
         layout.setSpacing(true);
 
         spinner = new ProgressBar();
         spinner.setIndeterminate(true);
-        spinner.setWidth(200, Unit.PIXELS);
-        spinner.setHeight(200, Unit.PIXELS);
-        layout.addComponent(spinner);
-        layout.setComponentAlignment(spinner, Alignment.MIDDLE_CENTER);
+        spinner.setWidth("200px");
+        spinner.setHeight("200px");
+        layout.add(spinner);
+        //layout.setComponentAlignment(spinner, Alignment.MIDDLE_CENTER);
 
-        errorLabel = new Label("Something went wrong :(");
-        errorLabel.setWidth(100, Unit.PERCENTAGE);
-        errorLabel.addStyleName(ValoTheme.LABEL_H1);
-        errorLabel.addStyleName(ValoTheme.LABEL_FAILURE);
+        errorLabel = new H1("Something went wrong :(");
+        errorLabel.setWidth("100%");
         errorLabel.setVisible(false);
 
-        errorDescLabel = new Label("n/a");
-        errorDescLabel.setWidth(100, Unit.PERCENTAGE);
-        errorDescLabel.addStyleName(ValoTheme.LABEL_FAILURE);
+        errorDescLabel = new H2("n/a");
+        errorDescLabel.setWidth("100%");
         errorDescLabel.setVisible(false);
 
-        layout.addComponents(errorLabel, errorDescLabel);
-
+        layout.add(errorLabel, errorDescLabel);
     }
 
     private void checkAuthentication(VaadinRequest request) {
@@ -68,14 +63,12 @@ public class LoginUI extends UI {
             UserInfo userInfo = Auth0Util.resolveUser(tokens.getAccessToken());
 
             Auth0Session.getCurrent().setAuth0Info(tokens, userInfo);
-            Page.getCurrent().open("/", null);
+            UI.getCurrent().navigate(MainView.VIEW_NAME);
 
         } catch(IdentityVerificationException e) {
             if("a0.missing_authorization_code".equals(e.getCode())) {
-
                 String url = getAuthenticationController().buildAuthorizeUrl(servletRequest, Auth0Util.getLoginURL()).build();
-                Page.getCurrent().open(url, null);
-
+                UI.getCurrent().getPage().setLocation(url);
             } else {
                 showError(e);
             }
@@ -88,15 +81,14 @@ public class LoginUI extends UI {
         spinner.setVisible(false);
         errorLabel.setVisible(true);
         errorDescLabel.setVisible(true);
-        errorDescLabel.setValue(t.getMessage());
+        errorDescLabel.getElement().setText(t.getMessage());
         t.printStackTrace();
     }
 
     @Override
-    protected void init(VaadinRequest request) {
-        checkAuthentication(request);
+    public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
+        checkAuthentication(VaadinService.getCurrentRequest());
     }
-
 
     protected AuthenticationController getAuthenticationController() {
         if(authenticationController == null) {
@@ -109,5 +101,4 @@ public class LoginUI extends UI {
 
         return authenticationController;
     }
-
 }

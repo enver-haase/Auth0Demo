@@ -1,22 +1,20 @@
 package org.vaadin.alump.auth0demo;
 
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
+import com.vaadin.flow.router.Route;
 
-@SpringComponent
-@UIScope
-public class ErrorView extends VerticalLayout implements View {
+@Route("error")
+public class ErrorView extends VerticalLayout implements AfterNavigationObserver {
 
     public ErrorView() {
-
     }
 
     @Override
-    public void enter(ViewChangeListener.ViewChangeEvent event) {
+    public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
         // Just redirect to main view for now
-        event.getNavigator().navigateTo(MainView.VIEW_NAME);
+        UI.getCurrent().navigate(MainView.VIEW_NAME);
     }
 }

@@ -1,89 +1,94 @@
 package org.vaadin.alump.auth0demo;
 
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.ui.*;
-import com.vaadin.ui.themes.ValoTheme;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
+import com.vaadin.flow.router.Route;
 
-import javax.annotation.PostConstruct;
-
-@SpringView(name = MainView.VIEW_NAME)
-@SpringComponent(MainView.VIEW_NAME)
-@UIScope
-public class MainView extends VerticalLayout implements View {
+@Route(MainView.VIEW_NAME)
+public class MainView extends VerticalLayout implements AfterNavigationObserver {
 
     public final static String VIEW_NAME = "main";
 
-    @Autowired
-    private Auth0Management management;
+    private final Auth0Management management;
 
-    @PostConstruct
-    protected void init() {
+    public MainView(Auth0Management management) {
+        this.management = management;
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
+        init();
+    }
+
+    private void init() {
         setMargin(true);
         setSpacing(true);
 
         HorizontalLayout buttons = new HorizontalLayout();
         buttons.setSpacing(true);
-        buttons.setWidth(100, Unit.PERCENTAGE);
+        buttons.setWidth("100%");
 
-        Button login = new Button("Login", this::login);
+        Button login = new Button("Login");
         login.setVisible(!Auth0Session.getCurrent().isLoggedIn());
-        Button logout = new Button("Logout", this::logout);
+        login.addClickListener(e->login());
+        Button logout = new Button("Logout");
+        logout.addClickListener(e->logout());
         logout.setVisible(Auth0Session.getCurrent().isLoggedIn());
         Button tryAccess = new Button("Try access view",
-                e -> getUI().getNavigator().navigateTo(LimitedView.VIEW_NAME));
-        buttons.addComponents(login, logout, tryAccess);
+                e -> UI.getCurrent().navigate(LimitedView.VIEW_NAME));
+        buttons.add(login, logout, tryAccess);
 
-        Auth0Session session = Auth0Session.getCurrent();
-
-        Label hello = new Label();
+        H1 hello = new H1();
         if(!Auth0Session.getCurrent().isLoggedIn()) {
-            hello.setValue("Please login");
+            hello.getElement().setText("Please login");
         }
-        hello.addStyleName(ValoTheme.LABEL_H1);
 
-        addComponents(buttons, hello);
+        add(buttons, hello);
 
         Auth0Session.getCurrent().getUser().ifPresent(u -> {
-            hello.setValue("Hey " + u.getGivenName().orElse(u.getSubject()) + "!");
+            hello.getElement().setText("Hey " + u.getGivenName().orElse(u.getSubject()) + "!");
 
             HorizontalLayout info = new HorizontalLayout();
             info.setSpacing(true);
-            info.setWidth(100, Unit.PERCENTAGE);
-            addComponent(info);
+            info.setWidth("100%");
+            add(info);
 
             Component userinfo = createUserInfoGrid(u);
-            info.addComponent(userinfo);
-            userinfo.setWidth(100, Unit.PERCENTAGE);
-            info.setExpandRatio(userinfo, 1f);
+            info.add(userinfo);
+            // TODO
+            //userinfo.setWidth("100%");
+            //info.setExpandRatio(userinfo, 1f);
 
-            u.getPicture().ifPresent(url -> {
-                Image image = new Image(null, new ExternalResource(url));
-                image.setWidth(200, Unit.PIXELS);
-                image.setHeight(200, Unit.PIXELS);
-                info.addComponents(image);
-            });
+//            u.getPicture().ifPresent(url -> {
+////                Image image = new Image(null, new ExternalResource(url));
+////                image.setWidth("200px");
+////                image.setHeight("200px");
+////                info.add(image);
+////            });
         });
 
         Label mgnLabel = new Label();
-        mgnLabel.setWidth(100, Unit.PERCENTAGE);
-        addComponent(mgnLabel);
+        mgnLabel.setWidth("100%");
+        add(mgnLabel);
         try {
             if(management.isEnabled()) {
-                mgnLabel.setValue("Found " + management.getUsers().size() + " users from Auth0");
+                mgnLabel.getElement().setText("Found " + management.getUsers().size() + " users from Auth0");
             } else {
-                mgnLabel.setValue("Management API key not defined");
+                mgnLabel.getElement().setText("Management API key not defined");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            mgnLabel.setValue("Failed to access management API");
-            mgnLabel.addStyleName(ValoTheme.LABEL_FAILURE);
+            mgnLabel.getElement().setText("Failed to access management API");
+            //mgnLabel.addStyleName(ValoTheme.LABEL_FAILURE);
         }
 
     }
@@ -95,9 +100,9 @@ public class MainView extends VerticalLayout implements View {
             try {
                 String value = user.getValue(key);
 
-                Label row = new Label(value);
-                row.setCaption(key);
-                layout.addComponent(row);
+                H3 row = new H3(value);
+                //row.setCaption(key);
+                layout.add(row);
             } catch(Exception e) {
                 System.err.println("Failed to read property " + key);
                 e.printStackTrace();
@@ -107,16 +112,11 @@ public class MainView extends VerticalLayout implements View {
         return layout;
     }
 
-    private void login(Button.ClickEvent event) {
+    private void login() {
         Auth0Session.getCurrent().login();
     }
 
-    private void logout(Button.ClickEvent event) {
+    private void logout() {
         Auth0Session.getCurrent().logout();
-    }
-
-    @Override
-    public void enter(ViewChangeListener.ViewChangeEvent event) {
-
     }
 }
