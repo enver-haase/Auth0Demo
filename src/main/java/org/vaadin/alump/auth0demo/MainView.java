@@ -12,8 +12,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 
 @Route(MainView.VIEW_NAME)
+@RouteAlias("")
 public class MainView extends VerticalLayout implements AfterNavigationObserver {
 
     public final static String VIEW_NAME = "main";

@@ -12,6 +12,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
@@ -63,6 +64,8 @@ public class LoginView extends VerticalLayout implements AfterNavigationObserver
             UserInfo userInfo = Auth0Util.resolveUser(tokens.getAccessToken());
 
             Auth0Session.getCurrent().setAuth0Info(tokens, userInfo);
+
+            RouteConfiguration.forSessionScope().setRoute(LimitedView.VIEW_NAME, LimitedView.class);
             UI.getCurrent().navigate(MainView.VIEW_NAME);
 
         } catch(IdentityVerificationException e) {

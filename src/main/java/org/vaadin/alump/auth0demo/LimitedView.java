@@ -8,7 +8,7 @@ import com.vaadin.flow.router.Route;
 
 import javax.annotation.PostConstruct;
 
-@Route(LimitedView.VIEW_NAME)
+//@Route(LimitedView.VIEW_NAME)
 public class LimitedView extends VerticalLayout {
 
     public static final String VIEW_NAME = "limited";
